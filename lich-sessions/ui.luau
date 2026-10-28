@@ -44,13 +44,50 @@ local function caption(text, color, weight)
   return ui.label({ text = text, fontSize = 11, fontWeight = weight, color = color, maxLines = 1 })
 end
 
--- The line under the title (statusrung.go): the rung while the session waits for you, else its path.
+-- statusrung.go toolGlyphs: the glyph a tool family wears, keyed by the names the
+-- harnesses report. An unknown name draws none.
+local TOOL_GLYPH = {
+  Bash = "terminal", Read = "file-text", Edit = "pencil", Write = "pencil", NotebookEdit = "pencil",
+  apply_patch = "pencil", Grep = "search", Glob = "search", WebFetch = "world", WebSearch = "world",
+  TodoWrite = "list-check",
+}
+
+-- toolLine is toolline.go's: an MCP tool as "<server> · <tool>", and the detail beside it.
+-- shortcut: only the mcp__<server>__<tool> spelling and Antigravity's call_mcp_tool are split;
+-- the single-underscore ones need the session's MCP servers, which `lich sessions` does not list.
+local function toolLine(name, detail)
+  if name == "call_mcp_tool" then
+    local server, tool = detail:match("^([^/]+)/(.+)$")
+    if server then return `{server} · {tool}`, "" end
+  end
+  local server, tool = name:match("^mcp__(.-)__(.+)$")
+  if server then return `{server} · {tool}`, detail end
+  return name, detail
+end
+
+local function rung(glyph, color, children)
+  local kids = {}
+  if glyph then table.insert(kids, ui.glyph({ name = glyph, size = 12, color = color })) end
+  for _, child in children do table.insert(kids, child) end
+  return ui.row({ gap = 4, align = "center" }, kids)
+end
+
+-- The line under the title (statusrung.go): what the session waits on you for, the tool
+-- its turn runs, else its path. tool, detail and reason come from `lich sessions --json`
+-- and are absent on a lich too old to report them.
 local function secondLine(s, home)
   if s.state == "waiting" then
-    return ui.row({ gap = 4, align = "center" }, {
-      ui.glyph({ name = "help-circle", size = 12, color = "tertiary" }),
-      caption(noctalia.tr("state.waiting"), "tertiary", "medium"),
-    })
+    local reason = (s.reason or "") ~= "" and s.reason or noctalia.tr("state.waiting")
+    return rung("help-circle", "tertiary", { caption(reason, "tertiary", "medium") })
+  end
+  if M.isBusy(s) and (s.tool or "") ~= "" then
+    local label, detail = toolLine(s.tool, s.detail or "")
+    local kids = { ui.label({ text = label, fontSize = 11, fontWeight = "medium", color = "on_surface", maxLines = 1 }) }
+    if detail ~= "" then
+      table.insert(kids, caption("·", "on_surface_variant/0.5"))
+      table.insert(kids, ui.label({ text = detail, fontSize = 11, color = "on_surface_variant", maxLines = 1, flexGrow = 1 }))
+    end
+    return rung(TOOL_GLYPH[s.tool], "on_surface_variant", kids)
   end
   local path = s.path or ""
   if home ~= "" and path:sub(1, #home) == home then path = "~" .. path:sub(#home + 1) end

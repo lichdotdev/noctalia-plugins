@@ -2,7 +2,9 @@
 
 The sessions open in [lich](https://github.com/lichdotdev/lich), drawn the way lich's own sidebar draws them:
 grouped by project and sidebar folder, each card with the agent's mark in a status ring that spins while the agent
-works, turns amber when it waits for you and green when its turn is done.
+works, turns amber when it waits for you and green when its turn is done. Under the title, a working session shows
+the tool its turn runs and one waiting for you says why, on a lich whose `lich sessions --json` reports them; on an
+older one that line is the session's path.
 
 ![The panel, with example sessions](thumbnail.webp)
 
@@ -42,7 +44,7 @@ Every process the plugin starts, all read-only except `lich focus`:
 
 | Command | When |
 | --- | --- |
-| `lich sessions --json` | Every 3 seconds. |
+| `lich sessions --json` | Every second. |
 | `lich folders --project <dir> --json` | Every 15 seconds, once per project. |
 | `lich worktrees --project <dir> --json` | Every 15 seconds, once per project. |
 | `git -C <dir> branch --show-current` | Every 15 seconds, once per project. |

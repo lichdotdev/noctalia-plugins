@@ -5,9 +5,9 @@
 
 local assets = require("./assets.luau")
 
-local POLL_MS = 3000
--- Folders and branches change rarely: refresh them every 5th tick (15s).
-local META_EVERY = 5
+local POLL_MS = 1000
+-- Folders and branches change rarely: refresh them every 15th tick (15s).
+local META_EVERY = 15
 
 local lastState = {}
 local inFlight = false
