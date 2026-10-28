@@ -4,6 +4,8 @@ The sessions open in [lich](https://github.com/lichdotdev/lich), drawn the way l
 grouped by project and sidebar folder, each card with the agent's mark in a status ring that spins while the agent
 works, turns amber when it waits for you and green when its turn is done.
 
+![The panel, with example sessions](thumbnail.webp)
+
 ## Entries
 
 | Entry | Kind | What it shows |
