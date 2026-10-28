@@ -10,5 +10,5 @@ icon = "flame"
 description = "Your lich sessions in the bar, a panel and on the desktop: who is working, who is waiting for you, one click to open its card."
 plugin_api = 43
 tags = ["lich", "agents", "productivity"]
-updated_at = 1793215548
-added_at = 1793215548
+updated_at = 1793215557
+added_at = 1793215557
