@@ -1,6 +1,6 @@
 id = "lichdotdev/lich-sessions"
 name = "lich Sessions"
-version = "0.1.0"
+version = "0.2.0"
 plugin_api = 43
 author = "lichdotdev"
 license = "MIT"
@@ -28,3 +28,12 @@ position = "center"
 [[desktop_widget]]
 id = "desktop"
 entry = "desktop.luau"
+
+  [[desktop_widget.setting]]
+  key = "max_sessions"
+  type = "int"
+  label_key = "settings.max_sessions.label"
+  description_key = "settings.max_sessions.description"
+  default = 8
+  min = 1
+  max = 30

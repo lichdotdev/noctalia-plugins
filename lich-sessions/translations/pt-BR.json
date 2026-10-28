@@ -1,4 +1,10 @@
 {
+  "desktop": {
+    "more": {
+      "one": "+{count} sessão",
+      "other": "+{count} sessões"
+    }
+  },
   "error": {
     "sessions": "lich sessions falhou"
   },
@@ -7,6 +13,12 @@
   },
   "panel": {
     "empty": "Nenhuma sessão aberta."
+  },
+  "settings": {
+    "max_sessions": {
+      "description": "Quantos cards de sessão cabem no widget. As que esperam você vêm primeiro, depois as que estão trabalhando.",
+      "label": "Sessões exibidas"
+    }
   },
   "state": {
     "busy": "trabalhando…",
