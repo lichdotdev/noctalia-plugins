@@ -6,14 +6,15 @@
 local marks = require("./marks.luau")
 
 -- lich's sidebar ring (native/cmd/lich-native/sidebar_card.go statusGlyph): 22px,
--- 1.25px stroke, a quarter arc over a 25% track turning once a second.
+-- 1.25px stroke, a quarter arc over a 25% track turning once a second, no ring
+-- at rest, and a 14px mark.
 local SIZE = 22
 local STROKE = 1.25
-local ICON = 12
+local ICON = 14
 local BUSY_FRAMES = 30
 local TRACK_OPACITY = 0.25
 
-local M = { SIZE = SIZE, BUSY_FRAMES = BUSY_FRAMES }
+local M = { SIZE = SIZE, ICON = ICON, BUSY_FRAMES = BUSY_FRAMES }
 
 local function palette()
   return {
@@ -24,8 +25,9 @@ local function palette()
   }
 end
 
+-- The v prefix changes with the files' shape, so an update does not reuse the old set.
 local function key(p)
-  return (`{p.muted}{p.wait}{p.pass}{p.fg}`):gsub("#", "")
+  return (`v2-{p.muted}{p.wait}{p.pass}{p.fg}`):gsub("#", "")
 end
 
 local function svg(body)
@@ -71,7 +73,7 @@ function M.ensure()
     local mark = icon(p.muted, d)
     noctalia.writeFile(`{dir}/{ringName(name, "waiting")}`, svg(circle(p.wait, 1) .. mark))
     noctalia.writeFile(`{dir}/{ringName(name, "done")}`, svg(circle(p.pass, 1) .. mark))
-    noctalia.writeFile(`{dir}/{ringName(name, "idle")}`, svg(circle(p.muted, TRACK_OPACITY) .. mark))
+    noctalia.writeFile(`{dir}/{ringName(name, "idle")}`, svg(mark))
     for f = 0, BUSY_FRAMES - 1 do
       local track = circle(p.muted, TRACK_OPACITY) .. arc(p.muted, f)
       noctalia.writeFile(`{dir}/{ringName(name, string.format("busy-%02d", f))}`, svg(track .. mark))

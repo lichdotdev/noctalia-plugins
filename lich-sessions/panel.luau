@@ -17,12 +17,26 @@ local function focus(s)
   panel.close()
 end
 
-local function render()
+local render
+local ctl = { focus = focus }
+
+function ctl.hover(s, on)
+  if on then
+    ctl.hovered = s.id
+  elseif ctl.hovered == s.id then
+    ctl.hovered = nil
+  end
+  render()
+end
+
+function render()
+  local island = view.ISLAND
   local header = view.header(sessions, dir, 18)
   table.insert(header, ui.button({ glyph = "close", variant = "ghost", onClick = function() panel.close() end }))
-  panel.render(ui.column({ flexGrow = 1, gap = 12, align = "stretch" }, {
-    ui.row({ align = "center", gap = 8 }, header),
-    ui.scroll({ flexGrow = 1, gap = 4, align = "stretch" }, view.body(view.sorted(sessions, ORDER), frame, dir, HOME, focus)),
+  panel.render(ui.column({ flexGrow = 1, gap = island.gutter, align = "stretch" }, {
+    ui.row({ align = "center", gap = 8, paddingH = 4 }, header),
+    ui.scroll({ flexGrow = 1, gap = 2, padding = 8, align = "stretch", fill = island.fill, radius = island.radius },
+      view.body(view.sorted(sessions, ORDER), frame, dir, HOME, ctl)),
   }))
 end
 
@@ -54,4 +68,5 @@ end
 
 function onClose()
   open = false
+  ctl.hovered = nil
 end

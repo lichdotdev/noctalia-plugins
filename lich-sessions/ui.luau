@@ -10,7 +10,11 @@ local FRAME_MS = 33
 local PROVIDER_ICON = { claude = "claude", codex = "codex", antigravity = "antigravity", opencode = "opencode", omp = "pi", cursor = "cursor" }
 local PROVIDER_GLYPH = { crush = "sparkles", kiro = "ghost" }
 
-local M = { FRAME_MS = FRAME_MS }
+-- lich lays its sidebar and stage out as islands (main.go island): rounded boxes
+-- (ui.RadiusLG) a shade off the canvas around them, 6px apart (main.go gutter).
+local ISLAND = { fill = "surface_container", radius = 8, gutter = 6 }
+
+local M = { FRAME_MS = FRAME_MS, ISLAND = ISLAND }
 
 function M.isBusy(s)
   return s.state == "busy" or s.state == "compacting"
@@ -31,7 +35,7 @@ function M.ring(s, frame, dir)
   return ui.column({ width = size, height = size, gap = -size }, {
     img,
     ui.column({ width = size, height = size, align = "center", justify = "center" }, {
-      ui.glyph({ name = PROVIDER_GLYPH[s.kind] or "terminal", size = 12, color = "on_surface_variant" }),
+      ui.glyph({ name = PROVIDER_GLYPH[s.kind] or "terminal", size = assets.ICON, color = "on_surface_variant" }),
     }),
   })
 end
@@ -40,16 +44,12 @@ local function caption(text, color, weight)
   return ui.label({ text = text, fontSize = 11, fontWeight = weight, color = color, maxLines = 1 })
 end
 
--- One line under the title: the state when it wants attention, else the branch, else the path.
+-- The line under the title (statusrung.go): the rung while the session waits for you, else its path.
 local function secondLine(s, home)
-  if M.isBusy(s) then
-    return caption(noctalia.tr("state.busy"), "on_surface_variant")
-  elseif s.state == "waiting" then
-    return caption(noctalia.tr("state.waiting"), "tertiary", "medium")
-  elseif (s.branch or "") ~= "" then
+  if s.state == "waiting" then
     return ui.row({ gap = 4, align = "center" }, {
-      ui.glyph({ name = "git-branch", size = 11, color = "on_surface_variant" }),
-      caption(s.branch, "on_surface_variant"),
+      ui.glyph({ name = "help-circle", size = 12, color = "tertiary" }),
+      caption(noctalia.tr("state.waiting"), "tertiary", "medium"),
     })
   end
   local path = s.path or ""
@@ -57,15 +57,28 @@ local function secondLine(s, home)
   return caption(path, "on_surface_variant")
 end
 
-function M.card(s, frame, dir, home, onClick)
-  local fill = s.state == "waiting" and "tertiary/0.08" or "on_surface/0.03"
-  return ui.row({ gap = 10, align = "center", paddingH = 10, paddingV = 8, radius = 8, fill = fill, onClick = onClick }, {
-    M.ring(s, frame, dir),
-    ui.column({ gap = 3, flexGrow = 1 }, {
-      ui.label({ text = s.label, fontSize = 13, fontWeight = "medium", color = "on_surface", maxLines = 1 }),
-      secondLine(s, home),
+-- card is lich's (sidebar_card.go cardBody, cardcolor.go): transparent at rest and
+-- the hover color under the pointer. ctl is nil where nothing can be clicked.
+function M.card(s, frame, dir, home, ctl)
+  local rows = {
+    ui.row({ gap = 6, align = "center" }, {
+      M.ring(s, frame, dir),
+      ui.label({ text = s.label, fontSize = 13, fontWeight = "medium", color = "on_surface", maxLines = 1, flexGrow = 1 }),
     }),
-  })
+    secondLine(s, home),
+  }
+  if (s.branch or "") ~= "" then
+    table.insert(rows, ui.row({ gap = 4, align = "center" }, {
+      ui.glyph({ name = "git-branch", size = 12, color = "on_surface_variant" }),
+      caption(s.branch, "on_surface_variant"),
+    }))
+  end
+  return ui.column({
+    gap = 6, paddingH = 10, paddingV = 8, radius = 6, align = "stretch",
+    fill = ctl and ctl.hovered == s.id and "hover" or nil,
+    onClick = ctl and function() ctl.focus(s) end or nil,
+    onHover = ctl and function(state) ctl.hover(s, state == "true") end or nil,
+  }, rows)
 end
 
 local PRIORITY = { waiting = 0, busy = 1, compacting = 1 }
@@ -127,15 +140,18 @@ function M.header(sessions, dir, size)
   }
 end
 
-function M.groupHeader(title, count)
-  return ui.row({ gap = 6, align = "center", paddingH = 4 }, {
-    ui.label({ text = string.upper(title), fontSize = 10, fontWeight = "bold", color = "on_surface_variant" }),
-    ui.label({ text = tostring(count), fontSize = 10, color = "on_surface_variant/0.6" }),
-  })
+-- groupHeader is sidebar_group_header.go's: the title in capitals, its count, and a rule to the edge.
+local function groupHeader(glyph, title, count)
+  local kids = {}
+  if glyph then table.insert(kids, ui.glyph({ name = glyph, size = 12, color = "on_surface_variant" })) end
+  table.insert(kids, ui.label({ text = string.upper(title), fontSize = 10, fontWeight = "semibold", color = "on_surface_variant", maxLines = 1 }))
+  table.insert(kids, ui.label({ text = tostring(count), fontSize = 10, fontWeight = "medium", color = "on_surface_variant/0.6" }))
+  table.insert(kids, ui.separator({ flexGrow = 1, orientation = "horizontal", color = "outline_variant" }))
+  return ui.row({ gap = 6, align = "center", paddingH = 4, paddingV = 4 }, kids)
 end
 
 -- body groups by project, then by sidebar folder, the way lich's sidebar does.
-function M.body(sessions, frame, dir, home, onClick)
+function M.body(sessions, frame, dir, home, ctl)
   local body = {}
   if #sessions == 0 then
     table.insert(body, ui.label({ text = noctalia.tr("panel.empty"), fontSize = 12, color = "on_surface_variant" }))
@@ -143,17 +159,12 @@ function M.body(sessions, frame, dir, home, onClick)
   local byProject, projects = M.groupBy(sessions, "project")
   for i, project in projects do
     if i > 1 then table.insert(body, ui.spacer({ height = 6 })) end
-    table.insert(body, M.groupHeader(project, #byProject[project]))
+    table.insert(body, groupHeader(nil, project, #byProject[project]))
     local byFolder, folders = M.groupBy(byProject[project], "folder")
     for _, folder in folders do
-      if folder ~= "" then
-        table.insert(body, ui.row({ gap = 6, align = "center", paddingH = 4, paddingV = 2 }, {
-          ui.glyph({ name = "folder", size = 12, color = "on_surface_variant" }),
-          caption(folder, "on_surface_variant"),
-        }))
-      end
+      if folder ~= "" then table.insert(body, groupHeader("folder", folder, #byFolder[folder])) end
       for _, s in byFolder[folder] do
-        table.insert(body, M.card(s, frame, dir, home, onClick and function() onClick(s) end or nil))
+        table.insert(body, M.card(s, frame, dir, home, ctl))
       end
     end
   end
