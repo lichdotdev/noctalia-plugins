@@ -68,6 +68,24 @@ function M.card(s, frame, dir, home, onClick)
   })
 end
 
+local PRIORITY = { waiting = 0, busy = 1, compacting = 1 }
+
+-- sorted returns the sessions in the configured order: "lich" keeps the sidebar's,
+-- "attention" puts the ones waiting for you first, then the working ones.
+function M.sorted(sessions, order)
+  if order ~= "attention" then return sessions end
+  local ranked = {}
+  for i, s in sessions do table.insert(ranked, { s = s, i = i }) end
+  table.sort(ranked, function(a, b)
+    local pa, pb = PRIORITY[a.s.state] or 2, PRIORITY[b.s.state] or 2
+    if pa ~= pb then return pa < pb end
+    return a.i < b.i
+  end)
+  local list = {}
+  for _, r in ranked do table.insert(list, r.s) end
+  return list
+end
+
 function M.groupBy(list, field)
   local groups, order = {}, {}
   for _, s in list do

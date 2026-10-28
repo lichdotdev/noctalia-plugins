@@ -1,6 +1,6 @@
 id = "lichdotdev/lich-sessions"
 name = "lich Sessions"
-version = "0.2.0"
+version = "0.3.0"
 plugin_api = 43
 author = "lichdotdev"
 license = "MIT"
@@ -25,9 +25,31 @@ height = 480
 placement = "floating"
 position = "center"
 
+  [[panel.setting]]
+  key = "order"
+  type = "select"
+  label_key = "settings.order.label"
+  description_key = "settings.order.description"
+  default = "attention"
+  options = [
+    { value = "attention", label_key = "settings.order.options.attention" },
+    { value = "lich", label_key = "settings.order.options.lich" },
+  ]
+
 [[desktop_widget]]
 id = "desktop"
 entry = "desktop.luau"
+
+  [[desktop_widget.setting]]
+  key = "order"
+  type = "select"
+  label_key = "settings.order.label"
+  description_key = "settings.order.description"
+  default = "attention"
+  options = [
+    { value = "attention", label_key = "settings.order.options.attention" },
+    { value = "lich", label_key = "settings.order.options.lich" },
+  ]
 
   [[desktop_widget.setting]]
   key = "max_sessions"

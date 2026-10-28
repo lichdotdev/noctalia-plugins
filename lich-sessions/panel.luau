@@ -6,6 +6,7 @@ local dir = noctalia.state.get("assets") or ""
 local frame = 0
 local open = false
 local HOME = noctalia.getenv("HOME") or ""
+local ORDER = noctalia.getConfig("order")
 
 local function shellQuote(s)
   return "'" .. tostring(s):gsub("'", "'\\''") .. "'"
@@ -21,7 +22,7 @@ local function render()
   table.insert(header, ui.button({ glyph = "close", variant = "ghost", onClick = function() panel.close() end }))
   panel.render(ui.column({ flexGrow = 1, gap = 12, align = "stretch" }, {
     ui.row({ align = "center", gap = 8 }, header),
-    ui.scroll({ flexGrow = 1, gap = 4, align = "stretch" }, view.body(sessions, frame, dir, HOME, focus)),
+    ui.scroll({ flexGrow = 1, gap = 4, align = "stretch" }, view.body(view.sorted(sessions, ORDER), frame, dir, HOME, focus)),
   }))
 end
 

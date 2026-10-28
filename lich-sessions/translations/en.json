@@ -18,6 +18,14 @@
     "max_sessions": {
       "description": "How many session cards fit in the widget. The ones waiting for you come first, then the working ones.",
       "label": "Sessions shown"
+    },
+    "order": {
+      "description": "How the session cards are ordered. Projects follow their first card.",
+      "label": "Order",
+      "options": {
+        "attention": "Waiting for you first",
+        "lich": "lich's sidebar order"
+      }
     }
   },
   "state": {

@@ -13,6 +13,13 @@ works, turns amber when it waits for you and green when its turn is done.
 | `desktop` | Desktop widget | The same list, read-only, for the desktop or the lock screen. |
 | `service` | Service | Polls lich and sends a notification when a session starts waiting for you. |
 
+## Settings
+
+| Setting | Entries | Default | What it does |
+| --- | --- | --- | --- |
+| `order` | `panel`, `desktop` | `attention` | `attention` puts the sessions waiting for you first, then the working ones; `lich` keeps lich's sidebar order. |
+| `max_sessions` | `desktop` | `8` | How many cards the desktop widget shows (1-30), with a "+N" line for the rest. Desktop widgets cannot scroll. |
+
 Add the bar widget from the bar's *Add widget* picker and the desktop widget from the desktop or lock-screen widget
 editor. Shell sessions are left out.
 
