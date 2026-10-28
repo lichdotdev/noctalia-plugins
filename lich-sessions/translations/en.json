@@ -1,0 +1,27 @@
+{
+  "error": {
+    "sessions": "lich sessions failed"
+  },
+  "notify": {
+    "waiting": "{label} is waiting for you ({project})"
+  },
+  "panel": {
+    "empty": "No open sessions."
+  },
+  "state": {
+    "busy": "working…",
+    "waiting": "waiting for you"
+  },
+  "summary": {
+    "busy": {
+      "one": "{count} working",
+      "other": "{count} working"
+    },
+    "idle": "all done",
+    "waiting": {
+      "one": "{count} waiting",
+      "other": "{count} waiting"
+    }
+  },
+  "tooltip": "{total} sessions · {busy} working · {waiting} waiting for you"
+}

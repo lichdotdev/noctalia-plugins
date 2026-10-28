@@ -1,0 +1,30 @@
+id = "lichdotdev/lich-sessions"
+name = "lich Sessions"
+version = "0.1.0"
+plugin_api = 43
+author = "lichdotdev"
+license = "MIT"
+dependencies = ["lich", "git"]
+tags = ["lich", "agents", "productivity"]
+icon = "flame"
+description = "Your lich sessions in the bar, a panel and on the desktop: who is working, who is waiting for you, one click to open its card."
+
+[[service]]
+id = "service"
+entry = "service.luau"
+
+[[widget]]
+id = "bar"
+entry = "bar.luau"
+
+[[panel]]
+id = "panel"
+entry = "panel.luau"
+width = 460
+height = 480
+placement = "floating"
+position = "center"
+
+[[desktop_widget]]
+id = "desktop"
+entry = "desktop.luau"
