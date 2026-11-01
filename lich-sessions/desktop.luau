@@ -52,11 +52,10 @@ noctalia.state.watch("assets", function(value)
   render()
 end)
 
+-- No spinner here: a desktop or lock-screen widget is drawn even behind windows, and
+-- animating it at lich's frame rate cost ~40% of a CPU core. It redraws on state changes.
 function update()
-  local busy = view.counts(sessions)
-  noctalia.setUpdateInterval(busy > 0 and view.FRAME_MS or 1000)
-  frame += 1
-  render()
+  noctalia.setUpdateInterval(60000)
 end
 
 render()
