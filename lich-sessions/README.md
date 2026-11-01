@@ -33,6 +33,22 @@ Open the panel from a keybind with:
 noctalia msg panel-toggle lichdotdev/lich-sessions:panel
 ```
 
+## Performance
+
+Noctalia cannot animate an image by itself, so every step of the busy spinner rebuilds
+the widget's whole tree and the host redraws it. What that costs, measured on an
+i7-13650HX with three busy sessions:
+
+| Entry | While a session is busy | Otherwise |
+| --- | --- | --- |
+| `desktop` | redraws at 10fps on the host's frame ticks: 3-7% of one core | redraws only when a session changes state |
+| `panel` | redraws at 30fps, only while the panel is open | idle |
+| `service` | runs `lich sessions --json` every second, and the folder and worktree commands every 15 seconds | the same |
+
+A timer-driven desktop widget at 30fps cost 30-40% of a core, even with the widget covered
+by windows, which is why the desktop widget follows the host's frames at a lower rate.
+Each desktop or lock-screen widget you add is its own instance and adds its own cost.
+
 ## Dependencies
 
 - `lich` on `PATH`, running.

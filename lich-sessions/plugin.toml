@@ -1,6 +1,6 @@
 id = "lichdotdev/lich-sessions"
 name = "lich Sessions"
-version = "0.4.1"
+version = "0.4.2"
 plugin_api = 43
 author = "lichdotdev"
 license = "MIT"

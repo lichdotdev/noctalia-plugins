@@ -43,8 +43,20 @@ local function render()
   }))
 end
 
+-- The spinner runs on the host's frame ticks, not on a timer: a timer kept rebuilding
+-- the tree at 30fps while the widget was covered by windows, ~40% of a CPU core.
+-- Ticks follow the frames the host actually draws, and they are only asked for while
+-- a session is busy; the tree is rebuilt only when the spinner moves to its next frame.
+local elapsed = 0
+
+local function wantTicks()
+  local busy = view.counts(sessions)
+  desktopWidget.setNeedsFrameTick(busy > 0)
+end
+
 noctalia.state.watch("sessions", function(value)
   sessions = value or {}
+  wantTicks()
   render()
 end)
 noctalia.state.watch("assets", function(value)
@@ -52,10 +64,21 @@ noctalia.state.watch("assets", function(value)
   render()
 end)
 
--- No spinner here: a desktop or lock-screen widget is drawn even behind windows, and
--- animating it at lich's frame rate cost ~40% of a CPU core. It redraws on state changes.
+-- Rebuilding the island is the cost, not the tick, so it redraws at 10fps; the frame
+-- index still advances with real time, so the ring turns at lich's speed.
+local REDRAW_MS = 100
+
+function onFrameTick(deltaMs)
+  elapsed += deltaMs
+  if elapsed < REDRAW_MS then return end
+  frame += elapsed // view.FRAME_MS
+  elapsed %= view.FRAME_MS
+  render()
+end
+
 function update()
   noctalia.setUpdateInterval(60000)
 end
 
+wantTicks()
 render()
